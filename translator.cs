@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 public class Translator
@@ -17,69 +18,85 @@ public class Translator
             return;
         }
 
-        bool found = false;
+        // Load translations into a dictionary
+        var translations = LoadTranslations(file);
 
-        if (File.Exists(file))
+        if (translations.TryGetValue(word, out string translation))
         {
-            var lines = File.ReadAllLines(file);
+            Console.WriteLine($"Translation: {translation}");
+            return;
+        }
 
-            foreach (var line in lines)
+        Console.WriteLine("Translation not found. Would you like to add it? (yes/no)");
+        string response;
+        while (true)
+        {
+            response = Console.ReadLine()?.Trim().ToLower();
+            if (response == "yes" || response == "no")
             {
-                var parts = line.Split(',');
-                if (parts.Length == 2 && parts[0].Trim().Equals(word, StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.WriteLine($"Translation: {parts[1].Trim()}");
-                    found = true;
-                    break;
-                }
+                break; // Valid response
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter 'yes' or 'no'.");
+            }
+        }
+
+        if (response == "yes")
+        {
+            Console.WriteLine("Enter the translation:");
+            string newTranslation = Console.ReadLine()?.Trim();
+
+            if (!string.IsNullOrEmpty(newTranslation))
+            {
+                // Add bidirectional entries
+                File.AppendAllText(file, $"\n{word},{newTranslation}");
+                File.AppendAllText(file, $"\n{newTranslation},{word}");
+                Console.WriteLine("Translation added successfully.");
+            }
+            else
+            {
+                Console.WriteLine("No translation provided. Nothing was added.");
             }
         }
         else
         {
-            Console.WriteLine($"File not found: {file}");
-            return;
-        }
-
-        if (!found)
-        {
-            Console.WriteLine("Translation not found. Would you like to add it? (yes/no)");
-            string response;
-            while (true)
-            {
-                response = Console.ReadLine()?.Trim().ToLower();
-                if (response == "yes" || response == "no")
-                {
-                    break; // Valid response
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please enter 'yes' or 'no'.");
-                }
-            }
-
-            if (response == "yes")
-            {
-                Console.WriteLine("Enter the translation:");
-                string translation = Console.ReadLine()?.Trim();
-
-                if (!string.IsNullOrEmpty(translation))
-                {
-                    File.AppendAllText(file, $"\n{word},{translation}");
-                    Console.WriteLine("Translation added successfully.");
-                }
-                else
-                {
-                    Console.WriteLine("No translation provided. Nothing was added.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No changes made.");
-            }
+            Console.WriteLine("No changes made.");
         }
     }
-}
 
+    private Dictionary<string, string> LoadTranslations(string file)
+    {
+        var translations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        if (File.Exists(file))
+        {
+            var lines = File.ReadAllLines(file);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+                if (parts.Length == 2)
+                {
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+
+                    if (!translations.ContainsKey(key))
+                    {
+                        translations[key] = value;
+                    }
+
+                    // Ensure bidirectional translation
+                    if (!translations.ContainsKey(value))
+                    {
+                        translations[value] = key;
+                    }
+                }
+            }
+        }
+
+        return translations;
+    }
+}
 
 partial class Program
 {
