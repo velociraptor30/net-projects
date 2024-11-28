@@ -184,10 +184,8 @@ namespace atmMachine
                 Console.WriteLine("1. Display Info ");
                 Console.WriteLine("2. Deposit ");
                 Console.WriteLine("3. Withdraw ");
-                Console.WriteLine("4. Change PIN "); // TO DO - Add func in parent class
-                Console.WriteLine("5. Transfer Money "); // TO DO - Inheritance 
-                Console.WriteLine("6. Register "); // TO DO - Inheritance 
-                Console.WriteLine("7. Exit ");  //TO DO - LOGGING
+                Console.WriteLine("4. Change PIN "); 
+                Console.WriteLine("5. Exit ");  
                 Console.Write("Choose an option: ");
 
                 switch (Console.ReadLine())
@@ -224,7 +222,7 @@ namespace atmMachine
                             Console.WriteLine("Incorrect current PIN.");
                         }
                         break;
-                    case "7":
+                    case "5":
                         Console.WriteLine("Thank you for using the ATM. Goodbye!");
                         running = false;
                         break;
